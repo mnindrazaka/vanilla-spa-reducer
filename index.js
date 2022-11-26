@@ -64,8 +64,8 @@ function send(action) {
 }
 
 function onStateChange(prevState, nextState) {
-  if (prevState.path !== nextState.path) {
-    history.pushState(null, "", nextState.path);
+  if (prevState.hash !== nextState.hash) {
+    history.pushState(null, "", nextState.hash);
   }
 
   if (prevState.inputValue !== nextState.inputValue) {
