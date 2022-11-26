@@ -34,6 +34,9 @@ function reducer(prevState, action) {
     case "NAVIGATE_PAGE": {
       return { ...prevState, hash: action.payload.hash };
     }
+    default: {
+      return prevState;
+    }
   }
 }
 
