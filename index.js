@@ -3,6 +3,7 @@ let state = {
   inputValue: localStorage.getItem("inputValue") ?? "",
   loading: false,
   products: [],
+  errorMessage: "",
 };
 
 function setState(newState) {
@@ -22,7 +23,24 @@ function reducer(prevState, action) {
       return {
         ...prevState,
         loading: false,
+        errorMessage: "",
         products: action.payload.products,
+      };
+    }
+    case "FETCH_EMPTY": {
+      return {
+        ...prevState,
+        loading: false,
+        errorMessage: "",
+        products: [],
+      };
+    }
+    case "FETCH_ERROR": {
+      return {
+        ...prevState,
+        loading: false,
+        errorMessage: action.payload.errorMessage,
+        products: [],
       };
     }
     case "CHANGE_INPUT": {
@@ -57,8 +75,15 @@ function onStateChange(prevState, nextState) {
   if (prevState.loading === false && nextState.loading === true) {
     fetch("https://dummyjson.com/products/search?q=" + state.inputValue)
       .then((res) => res.json())
-      .then((data) =>
-        send({ type: "FETCH_SUCCESS", payload: { products: data.products } })
+      .then((data) => {
+        if (data.products.length === 0) {
+          send({ type: "FETCH_EMPTY" });
+        } else {
+          send({ type: "FETCH_SUCCESS", payload: { products: data.products } });
+        }
+      })
+      .catch((err) =>
+        send({ type: "FETCH_ERROR", payload: { errorMessage: err.message } })
       );
   }
 }
@@ -103,10 +128,15 @@ function ProductList() {
   const emptyText = document.createElement("p");
   emptyText.textContent = "Product Empty";
 
+  const errorText = document.createElement("p");
+  errorText.textContent = state.errorMessage;
+
   const div = document.createElement("div");
 
   if (state.loading) {
     div.append(loadingText);
+  } else if (state.errorMessage !== "") {
+    div.append(errorText);
   } else if (state.products.length == 0) {
     div.append(emptyText);
   } else {
